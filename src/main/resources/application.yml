@@ -6,6 +6,8 @@ spring:
     url: jdbc:mysql://192.168.25.132/sell?characterEncoding=utf-8&useSSL=false
   jpa:
     show-sql: true
+  jackson:
+    default-property-inclusion: non_null
 server:
   servlet:
     context-path: /sell
@@ -16,3 +18,10 @@ server:
 #  file: /var/log/tomcat/sell.log
 #  level:
 #    com.shm.sell.LoggerTest: debug
+wechat:
+  mpAppId: wxd898fcb01713c658
+  mpAppSecret: 47ccc303338cee6e62894fxxxxxxxxxxx
+  mchId: 1483469312
+  mchKey: 06C56A89949D617xxxxxxxxxxx
+  keyPath: /var/weixin_cert/h5.p12
+  notifyUrl: http://sell.com/sell/pay/notify
