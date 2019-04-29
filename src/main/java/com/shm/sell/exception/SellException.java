@@ -1,6 +1,7 @@
 package com.shm.sell.exception;
 
 import com.shm.sell.enums.ResultEnum;
+import lombok.Getter;
 
 /**
  * @Auther: shm
@@ -8,6 +9,7 @@ import com.shm.sell.enums.ResultEnum;
  * @Description: com.shm.sell.exception 自定义异常
  * @version: 1.0
  */
+@Getter
 public class SellException extends RuntimeException{
     private Integer code;
 

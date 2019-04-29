@@ -67,4 +67,16 @@ public class ProductServiceImplTest {
         ProductInfo result = productService.save(productInfo);
         Assert.assertNotNull(result);
     }
+
+    @Test
+    public void onSale(){
+        ProductInfo productInfo = productService.onSale("4001597598");
+        Assert.assertNotNull(productInfo);
+    }
+
+    @Test
+    public void offSale(){
+        ProductInfo productInfo = productService.offSale("4001597598");
+        Assert.assertNotNull(productInfo);
+    }
 }

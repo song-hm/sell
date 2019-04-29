@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
+import java.util.Map;
 
 /**
  * @Auther: shm
@@ -22,6 +23,12 @@ public class WechatAccountConfig {
     //公众号APPSecret
     private String mpAppSecret;
 
+    //开放平台APPID
+    private String openAppId;
+
+    //开放平台APPSecret
+    private String openAppSecret;
+
     //商户号
     private String mchId;
 
@@ -35,5 +42,8 @@ public class WechatAccountConfig {
 
     //微信支付异步通知地址
     private String notifyUrl;
+
+    //微信模板ID
+    private Map<String,String> templateId;
 
 }

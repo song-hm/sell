@@ -8,12 +8,12 @@ import com.shm.sell.dto.OrderDTO;
 import com.shm.sell.enums.OrderStatusEnum;
 import com.shm.sell.enums.PayStatusEnum;
 import com.shm.sell.enums.ResultEnum;
+import com.shm.sell.exception.ResponseBankException;
 import com.shm.sell.exception.SellException;
 import com.shm.sell.pojo.OrderDetail;
 import com.shm.sell.pojo.OrderMaster;
 import com.shm.sell.pojo.ProductInfo;
-import com.shm.sell.service.OrderService;
-import com.shm.sell.service.ProductService;
+import com.shm.sell.service.*;
 import com.shm.sell.utils.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -49,6 +49,15 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private PayService payService;
+
+    @Autowired
+    private PushMessageService pushMessageService;
+
+    @Autowired
+    private WebSocket webSocket;
+
     @Override
     @Transactional
     public OrderDTO create(OrderDTO orderDTO) {
@@ -63,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
             ProductInfo productInfo = productService.findById(orderDetail.getProductId());
             if(productInfo == null){
                 throw new SellException(ResultEnum.PRODUCT_NOT_EXIST);
+//                throw new ResponseBankException();
             }
             //2、计算总价
             orderAmount = productInfo.getProductPrice()
@@ -93,6 +103,10 @@ public class OrderServiceImpl implements OrderService {
                 .map(e -> new CartDTO(e.getProductId(), e.getProductQuantity()))
                 .collect(Collectors.toList());
         productService.decreaseStock(cartDTOList);
+
+
+        //发送websocket信息
+        webSocket.sendMessage(orderDTO.getOrderId());
 
         return orderDTO;
     }
@@ -159,7 +173,7 @@ public class OrderServiceImpl implements OrderService {
 
         //如果已支付需要退款
         if(orderDTO.getPayStatus().equals(PayStatusEnum.SUCCESS.getCode())){
-            //TODO
+            payService.refund(orderDTO);
         }
 
         return orderDTO;
@@ -184,6 +198,10 @@ public class OrderServiceImpl implements OrderService {
             log.error("【完结订单】订单更新失败，orderMaster={}",orderMaster);
             throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
         }
+
+        //推送微信模板消息
+        pushMessageService.orderStatus(orderDTO);
+
         return orderDTO;
     }
 
@@ -212,5 +230,12 @@ public class OrderServiceImpl implements OrderService {
             throw new SellException(ResultEnum.ORDER_UPDATE_FAIL);
         }
         return orderDTO;
+    }
+
+    @Override
+    public Page<OrderDTO> findList(Pageable pageable) {
+        Page<OrderMaster> orderMasterPage = orderMasterRepository.findAll(pageable);
+        List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConverter.convert(orderMasterPage.getContent());
+        return new PageImpl<>(orderDTOList,pageable,orderMasterPage.getTotalElements());
     }
 }
